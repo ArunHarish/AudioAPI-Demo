@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Soundcloud example</title>
+    </head>
+    <body>
+        <audio controls id = 'output'></audio>
+    </body>
+    <script type = 'text/javascript' src = 'https://connect.soundcloud.com/sdk/sdk-3.1.2.js'></script>
+    <script type="text/javascript">
+    var audioContext = new AudioContext(),
+        DOM = document.querySelector('audio#output')
+
+    SC.initialize({
+        client_id:'432f273d72df1e608640ba4c3c81112c'
+    });
+    /*SC.get('/users/arun-harish-97/tracks').then(function(val) {
+        val.forEach(function($e) {
+          console.log($e.id);
+        })
+    });*/
+    SC.stream('./users/blackmill/tracks/243863266').then(function(player) {
+       var xmlReq = new XMLHttpRequest(),
+            fileReq = new XMLHttpRequest();
+       //player.options.streamUrlsEndpoint
+       xmlReq.open('GET', src="https://api.soundcloud.com/tracks/243863266/streams?client_id=432f273d72df1e608640ba4c3c81112c");
+       xmlReq.send();
+       xmlReq.addEventListener('load', function($d) {
+           tempURL = JSON.parse(xmlReq.response);
+           fileReq.open('GET', tempURL.http_mp3_128_url);
+           fileReq.responseType = 'arraybuffer';
+           fileReq.send();
+       });
+       fileReq.addEventListener('load',function(e) {
+           var src = audioContext.createBufferSource();
+          audioContext.decodeAudioData(fileReq.response, function($buffer) {
+              src.buffer = $buffer;
+              src.connect(audioContext.destination);
+              src.start(0);
+          })
+       })
+    })
+    </script>
+</html>
